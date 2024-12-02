@@ -34,8 +34,8 @@ https://af.ayas.ir/hls2/tv1.m3u8
 #EXTINF:-1 tvg-id="IRIB2.ir" tvg-logo="https://i.imgur.com/H6OJRJP.png" group-title="General",IRIB2
 https://af.ayas.ir/hls2/tv2.m3u8
 #EXTINF:-1 tvg-id="IRIB3.ir" tvg-logo="https://i.imgur.com/0oO9NFL.png" group-title="Sports",IRIB3
-https://live2.tmk.ir/channel3/signal/stream_360/index.m3u8
-https://live2.tmk.ir/channel3/signal/stream_720/index.m3u8
+https://liveproxy.splus.ir/hls/tv3/tv3_480/index.m3u8
+https://ok.ru/video/9692573212241
 https://live.tmk.ir/channel1/signal/stream_720/index.m3u8
 https://liveproxy.splus.ir/hls/tv3/tv3.m3u8
 https://ncdn.telewebion.com/tv3/live/playlist.m3u8
@@ -130,11 +130,5 @@ https://oitnhls.wns.live/hls/stream.m3u8
 #EXTINF:-1 tvg-id="VoATVPersian.us" tvg-logo="https://i.imgur.com/nvMqtG5.png" group-title="News",VOA Persian
 https://glwizhhls20.glwiz.com/VoA.m3u8?user=sglso5u42cnlufr3apj1mcqx2lmn&session=5ea1258dfbda62a5f777a8faee140fe640f0a1945781712a86a2d0f6c502c259a7425b3db7ef98c541cb2c78ec3c073604a943ec019f7ad6
 https://voa-ingest.akamaized.net/hls/live/2033876/tvmc07/playlist.m3u8
-#EXTINF:-1 tvg-id="IRIB4KUHD.ir" tvg-logo="https://i.imgur.com/YLZlzDS.png" group-title="General",Faratar IRIB 4K UHD
-https://gg.hls2.xyz/live/IRIB%20Faratar/chunks.m3u8?nimblesessionid=6484182&wmsAuthSign=c2VydmVyX3RpbWU9My80LzIwMjQgMToyNjozNSBBTSZoYXNoX3ZhbHVlPXNkbXkwRzIydHRoWkVBMHAwamdwa2c9PSZ2YWxpZG1pbnV0ZXM9NQ==
-#EXTINF:-1 tvg-id="FaraZaban.yt" tvg-logo="https://i.imgur.com/9y0TsCT.png" group-title="English",Fara Zaban
-https://anym3u8player.com/youtube.php/id/668d50e3c707d.m3u8
-#EXTINF:-1 tvg-id="EasyPeasy.yt" tvg-logo="https://i.imgur.com/SZVSOsy.png" group-title="English",Easy Peasy
-https://anym3u8player.com/youtube.php/id/668d5572404e1.m3u8
 
 
