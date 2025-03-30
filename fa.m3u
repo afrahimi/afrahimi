@@ -1,6 +1,6 @@
 #EXTM3U
 #EXTINF:-1 tvg-id="Manoto.uk" tvg-logo="https://i.imgur.com/g5OLcek.png" group-title="News",Manoto (720p)
-https://manoto.icdndhcp.com/hls/playlist.m3u8
+https://manotolive.icdndhcp.com/hls/playlist.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9My8zMC8yMDI1IDM6NTE6MzEgUE0maGFzaF92YWx1ZT12NTZSR3ZDcExwU3hhTkxTMjcxLytnPT0mdmFsaWRtaW51dGVzPTMw
 https://ssh101stream.ssh101.com/akamaissh101/ssh101/testeducational/playlist.m3u8
 #EXTINF:-1 tvg-id="SimayeAzadi.uk" tvg-logo="https://i.imgur.com/A8aOFxo.png" group-title="News",Simaye Azadi (1080p)
 https://simaytv.akamaized.net/hls/live/2043550/simayhls/index.m3u8
