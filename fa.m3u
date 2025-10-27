@@ -1,5 +1,6 @@
 #EXTM3U
 #EXTINF:-1 tvg-id="Manoto.uk" tvg-logo="https://i.imgur.com/g5OLcek.png" group-title="News",Manoto (720p)
+https://spf-cors-bk-9op.cfpass1.workers.dev/?url=https://m3u.iranvids.com/manoto/output.m3u8
 https://spf-cors-bktv9.cfpass1.workers.dev/?url=https://m3u.iranvids.com/manoto/output.m3u8
 #EXTINF:-1 tvg-id="SimayeAzadi.uk" tvg-logo="https://i.imgur.com/A8aOFxo.png" group-title="News",Simaye Azadi (1080p)
 https://simaytv.akamaized.net/hls/live/2043550/simayhls/index.m3u8
@@ -105,7 +106,7 @@ https://twohls.persiana.live/hls/stream.m3u8
 #EXTINF:-1 tvg-id="PMC.ae" tvg-logo="https://i.imgur.com/wLInb56.png" group-title="Music",PMC (1080p)
 https://hls.pmchd.live/hls/stream.m3u8
 #EXTINF:-1 tvg-id="PMCRoyale.ae" tvg-logo="https://i.imgur.com/wLInb56.png" group-title="Music",PMC Royale (720p)
-https://rohls.pmc.live/hls/stream.m3u8
+https://pmcrohls.wns.live/hls/stream.m3u8
 #EXTINF:-1 tvg-id="PressTV.ir" tvg-logo="https://i.imgur.com/nsYdri2.png" group-title="News",Press TV (720p)
 https://cdnlive.presstv.ir/cdnlive/smil:cdnlive.smil/playlist.m3u8
 #EXTINF:-1 tvg-id="RJTV.us" tvg-logo="https://i.imgur.com/axxUWWN.png" group-title="Music",Radio Javan TV (1080p)
@@ -134,6 +135,7 @@ https://oitnhls.wns.live/hls/stream.m3u8
 #EXTINF:-1 tvg-id="VoATVPersian.us" tvg-logo="https://i.imgur.com/nvMqtG5.png" group-title="News",VOA Persian
 https://glwizhhls20.glwiz.com/VoA.m3u8?user=sglso5u42cnlufr3apj1mcqx2lmn&session=5ea1258dfbda62a5f777a8faee140fe640f0a1945781712a86a2d0f6c502c259a7425b3db7ef98c541cb2c78ec3c073604a943ec019f7ad6
 https://voa-ingest.akamaized.net/hls/live/2033876/tvmc07/playlist.m3u8
+
 
 
 
