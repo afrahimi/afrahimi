@@ -1,9 +1,9 @@
 #EXTM3U
-#EXTINF:-1 tvg-id="Manoto.uk" parsa-id="Manoto" tvg-logo="https://i.imgur.com/g5OLcek.png" group-title="News",Manoto (720p)
+#EXTINF:-1 tvg-id="Manoto.uk" dynamic-id="parsa:Manoto" tvg-logo="https://i.imgur.com/g5OLcek.png" group-title="News",Manoto (720p)
 https://spf-cors-bk-9op.cfpass1.workers.dev/?url=https://m3u.iranvids.com/manoto/output.m3u8
 #EXTINF:-1 tvg-id="SimayeAzadi.uk" tvg-logo="https://i.imgur.com/A8aOFxo.png" group-title="News",Simaye Azadi (1080p)
 https://simaytv.akamaized.net/hls/live/2043550/simayhls/index.m3u8
-#EXTINF:-1 tvg-id="4UTV.tr" parsa-id="4U-TV" tvg-logo="https://i.imgur.com/0avyCUE.png" group-title="Entertainment",4U TV (720p)
+#EXTINF:-1 tvg-id="4UTV.tr" dynamic-id="parsa:4U-TV" tvg-logo="https://i.imgur.com/0avyCUE.png" group-title="Entertainment",4U TV (720p)
 https://hls.4utv.live/hls/stream.m3u8
 #EXTINF:-1 tvg-id="AVAFamily.ir" tvg-logo="https://i.imgur.com/QwBGLzK.png" group-title="Family",AVA Family (720p)
 https://familyhls.avatv.live/hls/stream.m3u8
@@ -35,7 +35,7 @@ https://hls.iranfarda.live/hls/stream.m3u8
 https://af.ayas.ir/hls2/tv1.m3u8
 #EXTINF:-1 tvg-id="IRIB2.ir" tvg-logo="https://i.imgur.com/H6OJRJP.png" group-title="General",IRIB2
 https://af.ayas.ir/hls2/tv2.m3u8
-#EXTINF:-1 tvg-id="IRIB3.ir" parsa-id="Shabake-3" tvg-logo="https://i.imgur.com/0oO9NFL.png" group-title="Sports",IRIB3
+#EXTINF:-1 tvg-id="IRIB3.ir" dynamic-id="darya:irib3-tv-live" tvg-logo="https://i.imgur.com/0oO9NFL.png" group-title="Sports",IRIB3
 https://stream.sainaertebat.com/hls2/tv3test.m3u8
 https://liveproxy.splus.ir/hls/tv3/tv3_480/index.m3u8
 https://ok.ru/video/9692573212241
@@ -59,14 +59,14 @@ https://live.aionet.ir/hls/nasim/nasim.m3u8
 https://live.aionet.ir/hls/salamat/salamat.m3u8
 #EXTINF:-1 tvg-id="Tamasha.ir" tvg-logo="https://i.imgur.com/fXjohWl.png" group-title="Series",IRIB Tamasha (540p)
 https://live.aionet.ir/hls/tamasha/tamasha.m3u8
-#EXTINF:-1 tvg-id="VarzeshTV.ir" parsa-id="Shabake-Varzesh" tvg-logo="https://i.imgur.com/2f62d9e.png" group-title="Sports",IRIB Varzesh (1080p)
+#EXTINF:-1 tvg-id="VarzeshTV.ir" dynamic-id="darya:varzish-tv-iran-live" tvg-logo="https://i.imgur.com/2f62d9e.png" group-title="Sports",IRIB Varzesh (1080p)
 https://liveproxy.splus.ir/hls/varzesh/varzesh_360/index.m3u8
 https://ncdn.telewebion.com/varzesh/live/playlist.m3u8
 https://glwizhhls22.glwiz.com/IRIBVarzesh/IRIBVarzesh_Low.m3u8?user=sglso5u42cnlufr3apj1mcqx2lmn&session=5665d2bca6aa579ed94f2455c7d71f839798fb39247b78d4432c1c153666c4cbe06ddd003e4e9328b00c7accc09f90a98c4c2302fb6588baef59f2cd4b76c6a0&hlsid=HTTP_ID_54306
 https://ayas.97588.ir.cdn.ir/hls2/varzeshtv.m3u8
 #EXTINF:-1 tvg-id="IRINN.ir" tvg-logo="https://i.imgur.com/8tzsC9h.png" group-title="News",IRINN (540p)
 https://live.aionet.ir/hls/irinn/irinn.m3u8
-#EXTINF:-1 tvg-id="TVITN.ir" parsa-id="ITN-TV" tvg-logo="https://i.imgur.com/lal24Vo.png" group-title="Entertainment",ITN (720p)
+#EXTINF:-1 tvg-id="TVITN.ir" dynamic-id="parsa:ITN-TV" tvg-logo="https://i.imgur.com/lal24Vo.png" group-title="Entertainment",ITN (720p)
 https://livestream.5centscdn.com/itnapp/4e0ea63032b868402b61d3a35e7ca168.sdp/chunks.m3u8?md5=SNC_aQ2In4HTlpAV-_-NHg&expires=1710905040
 #EXTINF:-1 tvg-id="MetaFilmTV.ir" tvg-logo="https://i.imgur.com/yFFSmb9.png" group-title="Movies",Meta Film TV (1080p)
 https://metafilmhls.wns.live/hls/stream.m3u8
@@ -102,28 +102,28 @@ https://sonhls.persiana.live/hls/stream.m3u8
 https://af.ayas.ir/hls2/persiana.m3u8
 #EXTINF:-1 tvg-id="PersianaTwo.fr" tvg-logo="https://i.imgur.com/Oz6VSkP.png" group-title="General",Persiana Two
 https://twohls.persiana.live/hls/stream.m3u8
-#EXTINF:-1 tvg-id="PMC.ae" parsa-id="PMC" tvg-logo="https://i.imgur.com/wLInb56.png" group-title="Music",PMC (1080p)
+#EXTINF:-1 tvg-id="PMC.ae" dynamic-id="parsa:PMC" tvg-logo="https://i.imgur.com/wLInb56.png" group-title="Music",PMC (1080p)
 https://hls.pmchd.live/hls/stream.m3u8
-#EXTINF:-1 tvg-id="PMCRoyale.ae" parsa-id="PMC-Royale" tvg-logo="https://i.imgur.com/wLInb56.png" group-title="Music",PMC Royale (720p)
+#EXTINF:-1 tvg-id="PMCRoyale.ae" dynamic-id="parsa:PMC-Royale" tvg-logo="https://i.imgur.com/wLInb56.png" group-title="Music",PMC Royale (720p)
 https://pmcrohls.wns.live/hls/stream.m3u8
 #EXTINF:-1 tvg-id="PressTV.ir" tvg-logo="https://i.imgur.com/nsYdri2.png" group-title="News",Press TV (720p)
 https://cdnlive.presstv.ir/cdnlive/smil:cdnlive.smil/playlist.m3u8
-#EXTINF:-1 tvg-id="RJTV.us" parsa-id="Radio-Javan" tvg-logo="https://i.imgur.com/axxUWWN.png" group-title="Music",Radio Javan TV (1080p)
+#EXTINF:-1 tvg-id="RJTV.us" dynamic-id="parsa:Radio-Javan" tvg-logo="https://i.imgur.com/axxUWWN.png" group-title="Music",Radio Javan TV (1080p)
 https://rjtvhls.wns.live/hls/stream.m3u8
-#EXTINF:-1 tvg-id="PBCTapeshTV.ir" parsa-id="Tapesh-Iran" tvg-logo="https://i.imgur.com/5voEagF.png" group-title="General",Tapesh Iran
+#EXTINF:-1 tvg-id="PBCTapeshTV.ir" dynamic-id="parsa:Tapesh-Iran" tvg-logo="https://i.imgur.com/5voEagF.png" group-title="General",Tapesh Iran
 https://iptv.tapesh.tv/tapeshiran/playlist.m3u8
 #EXTINF:-1 tvg-id="YourTimeTV.ir" tvg-logo="https://i.imgur.com/0zlnbzr.png" group-title="Entertainment",YourTime TV (720p)
 https://hls.yourtime.live/hls/stream.m3u8
 #EXTINF:-1 tvg-id="AvangTV.us" tvg-logo="https://i.imgur.com/nuLg4pe.png" group-title="Music",Avang TV (720p)
 https://hls.avang.live/hls/stream.m3u8
-#EXTINF:-1 tvg-id="BBCPersian.uk" parsa-id="BBC-Persian" tvg-logo="https://i.imgur.com/NG9Vovf.png" group-title="News",BBC Persian (720p)
+#EXTINF:-1 tvg-id="BBCPersian.uk" dynamic-id="parsa:BBC-Persian" tvg-logo="https://i.imgur.com/NG9Vovf.png" group-title="News",BBC Persian (720p)
 https://vs-hls-pushb-ww.live.cf.md.bbci.co.uk/x=4/i=urn:bbc:pips:service:bbc_persian_tv/pc_hd_abr_v2.m3u8
 https://glwizhhls25.glwiz.com/BBCPersian.m3u8?user=sglso5u42cnlufr3apj1mcqx2lmn&session=e583ee6592b4f0a166077c66f7b7638c9ce918f4751c8a6b432c1c153666c4cbe06ddd003e4e9328b00c7accc09f90a98c4c2302fb6588baef59f2cd4b76c6a0
 https://anym3u8player.com/youtube.php/id/668d4dd9ab72f.m3u8
 https://vs-cmaf-pushb-ww-live.akamaized.net/x=4/i=urn:bbc:pips:service:bbc_persian_tv/pc_hd_abr_v2_akamai_dash_live.mpd
 #EXTINF:-1 tvg-id="KanalJadid.uk" tvg-logo="https://i.imgur.com/bKk47oZ.png" group-title="News",Kanal Jadid (720p)
 https://kjhls.wns.live/hls/stream.m3u8
-#EXTINF:-1 tvg-id="MBCPersia.ae" parsa-id="MBC-Persia" tvg-logo="https://i.imgur.com/4FXiyjn.png" group-title="General",MBC Persia (1080p)
+#EXTINF:-1 tvg-id="MBCPersia.ae" dynamic-id="parsa:MBC-Persia" tvg-logo="https://i.imgur.com/4FXiyjn.png" group-title="General",MBC Persia (1080p)
 https://shls-mbcpersia-prod-dub.shahid.net/out/v1/bdc7cd0d990e4c54808632a52c396946/index.m3u8
 #EXTINF:-1 tvg-id="NavahangTV.fi" tvg-logo="https://i.imgur.com/qyn82JW.png" group-title="Music",Navahang TV (720p)
 https://hls.navahang.live/hls/stream.m3u8
@@ -131,9 +131,10 @@ https://hls.navahang.live/hls/stream.m3u8
 https://iptv.negahtv.com/negahtv/playlist.m3u8
 #EXTINF:-1 tvg-id="OmideIranTV.ir" tvg-logo="https://i.imgur.com/CKnSRQ1.png" group-title="Entertainment",Omide Iran (720p)
 https://oitnhls.wns.live/hls/stream.m3u8
-#EXTINF:-1 tvg-id="VoATVPersian.us" parsa-id="VOA-Persian" tvg-logo="https://i.imgur.com/nvMqtG5.png" group-title="News",VOA Persian
+#EXTINF:-1 tvg-id="VoATVPersian.us" dynamic-id="parsa:VOA-Persian" tvg-logo="https://i.imgur.com/nvMqtG5.png" group-title="News",VOA Persian
 https://glwizhhls20.glwiz.com/VoA.m3u8?user=sglso5u42cnlufr3apj1mcqx2lmn&session=5ea1258dfbda62a5f777a8faee140fe640f0a1945781712a86a2d0f6c502c259a7425b3db7ef98c541cb2c78ec3c073604a943ec019f7ad6
 https://voa-ingest.akamaized.net/hls/live/2033876/tvmc07/playlist.m3u8
+
 
 
 
