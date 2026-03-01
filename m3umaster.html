@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M3U Master - Playlist Editor & Organizer</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- HLS.js for stream preview -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.10/hls.min.js"></script>
+
+    <!-- SortableJS for Drag and Drop -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <style>
+        /* Custom Scrollbar for dark theme */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; 
+        }
+
+        .channel-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            touch-action: manipulation; /* Improves touch drag */
+        }
+        .channel-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Drag & Drop Styles */
+        .sortable-ghost {
+            opacity: 0.4;
+            background: #374151; /* gray-700 */
+            border: 2px dashed #60a5fa; /* blue-400 */
+        }
+        .sortable-drag {
+            cursor: grabbing;
+            opacity: 1;
+            background: #1f2937;
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            z-index: 50;
+        }
+
+        .line-clamp-1 {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .stream-chip {
+            transition: all 0.2s;
+        }
+        .stream-chip:hover {
+            background-color: #374151;
+        }
+        .stream-chip.active {
+            border-color: #3b82f6;
+            background-color: #1f2937;
+            color: #60a5fa;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-gray-800 border-b border-gray-700 h-16 flex items-center justify-between px-6 shrink-0 sticky top-0 z-30 shadow-md">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-layer-group text-blue-500 text-2xl"></i>
+            <h1 class="text-xl font-bold tracking-wide">M3U<span class="text-blue-500">Master</span></h1>
+            <span id="stats-badge" class="ml-4 bg-gray-700 text-xs px-2 py-1 rounded-full text-gray-400 hidden">0 Channels</span>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <input type="file" id="file-upload" accept=".m3u,.m3u8,.txt" class="hidden">
+            <button onclick="document.getElementById('file-upload').click()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm transition flex items-center gap-2">
+                <i class="fa-solid fa-upload"></i> Import M3U
+            </button>
+            
+            <button onclick="app.downloadM3U()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-md text-sm transition flex items-center gap-2 shadow-lg shadow-blue-900/50">
+                <i class="fa-solid fa-download"></i> Save & Export
+            </button>
+
+            <button onclick="app.clearAll()" class="text-red-400 hover:text-red-300 hover:bg-red-900/30 px-3 py-2 rounded-md text-sm transition" title="Clear All Data">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="flex flex-1">
+        
+        <!-- Sidebar (Groups) -->
+        <aside class="w-64 bg-gray-800 border-r border-gray-700 flex flex-col shrink-0 transition-all duration-300 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto" id="sidebar">
+            <div class="p-4 border-b border-gray-700 sticky top-0 bg-gray-800 z-10">
+                <div class="relative">
+                    <i class="fa-solid fa-search absolute left-3 top-3 text-gray-500 text-sm"></i>
+                    <input type="text" id="group-search" placeholder="Filter groups..." 
+                           class="w-full bg-gray-900 border border-gray-700 text-gray-200 text-sm rounded-md pl-9 pr-3 py-2 focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+            <div id="group-list" class="flex-1 p-2 space-y-1">
+                <div class="text-center text-gray-500 mt-10 text-sm italic">No playlist loaded</div>
+            </div>
+        </aside>
+
+        <!-- Main Content (Channels) -->
+        <main class="flex-1 flex flex-col min-w-0 bg-gray-900 relative">
+            
+            <!-- Toolbar -->
+            <div class="h-14 border-b border-gray-700 flex items-center justify-between px-6 bg-gray-900/95 backdrop-blur-sm shrink-0 sticky top-16 z-20">
+                <div class="flex flex-col justify-center overflow-hidden">
+                    <h2 id="current-group-title" class="text-lg font-semibold truncate max-w-md">All Channels</h2>
+                    <span class="text-xs text-gray-500 hidden sm:block">Drag to reorder</span>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <div class="relative w-64">
+                        <i class="fa-solid fa-search absolute left-3 top-3 text-gray-500 text-sm"></i>
+                        <input type="text" id="channel-search" placeholder="Search channels..." 
+                               class="w-full bg-gray-900 border border-gray-700 text-gray-200 text-sm rounded-md pl-9 pr-3 py-2 focus:outline-none focus:border-blue-500 transition-all focus:w-72">
+                    </div>
+                    <button onclick="app.addChannel()" class="bg-green-600 hover:bg-green-500 text-white w-8 h-8 rounded-md flex items-center justify-center shadow-lg transition" title="Add New Channel">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Channels Grid -->
+            <div id="channel-grid" class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 content-start">
+                <div class="col-span-full flex flex-col items-center justify-center h-64 text-gray-500">
+                    <i class="fa-regular fa-folder-open text-4xl mb-4 opacity-50"></i>
+                    <p>Import an .m3u file to get started</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-gray-800 rounded-lg shadow-2xl w-full max-w-5xl flex flex-col md:flex-row overflow-hidden max-h-[95vh]">
+            
+            <!-- Preview Section -->
+            <div class="w-full md:w-2/3 bg-black flex flex-col justify-center relative group border-r border-gray-700">
+                <div id="video-container" class="w-full aspect-video bg-black flex items-center justify-center relative">
+                    <video id="video-preview" controls class="w-full h-full object-contain"></video>
+                    <div id="player-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 z-10 bg-black">
+                        <i class="fa-solid fa-play-circle text-5xl mb-2 opacity-50"></i>
+                        <span>Select a stream to preview</span>
+                    </div>
+                </div>
+                <div class="p-3 bg-gray-900 border-t border-gray-800 flex flex-col gap-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-gray-500 uppercase">Current Source</span>
+                        <button onclick="app.testStream(app.currentPreviewUrl)" class="text-blue-400 hover:text-blue-300 text-xs">
+                            <i class="fa-solid fa-rotate-right"></i> Reload
+                        </button>
+                    </div>
+                    <div class="text-xs text-gray-300 font-mono truncate bg-gray-800 p-2 rounded select-all" id="preview-url">
+                        No source selected
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Section -->
+            <div class="w-full md:w-1/3 p-6 flex flex-col bg-gray-800 overflow-y-auto">
+                <div class="flex justify-between items-start mb-6">
+                    <h3 class="text-xl font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square text-blue-500"></i> Edit Channel
+                    </h3>
+                    <button onclick="app.closeModal()" class="text-gray-400 hover:text-white">
+                        <i class="fa-solid fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="edit-form" onsubmit="event.preventDefault(); app.saveEdit();" class="space-y-4 flex-1 flex flex-col">
+                    <input type="hidden" id="edit-id">
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Channel Name</label>
+                            <input type="text" id="edit-name" required class="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Group / Category</label>
+                            <div class="relative">
+                                <input type="text" id="edit-group" list="group-suggestions" class="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+                                <datalist id="group-suggestions"></datalist>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Logo URL</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="edit-logo" onchange="app.updateLogoPreview(this.value)" class="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+                                <div class="w-10 h-10 bg-gray-700 rounded flex items-center justify-center shrink-0 border border-gray-600 overflow-hidden relative group">
+                                    <img id="edit-logo-preview" src="" onerror="this.style.display='none'" class="max-w-full max-h-full object-contain">
+                                    <i class="fa-solid fa-image text-gray-500 text-xs" id="edit-logo-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Stream URLs (One per line)</label>
+                            <textarea id="edit-urls" rows="3" class="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white text-xs font-mono focus:border-blue-500 focus:outline-none break-all whitespace-pre resize-none mb-2" placeholder="http://stream1...&#10;http://stream2..."></textarea>
+                            
+                            <!-- Dynamic Source List for Testing -->
+                            <div class="bg-gray-900/50 rounded border border-gray-700 p-2 max-h-[120px] overflow-y-auto">
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-2">Click to test:</label>
+                                <div id="source-list" class="space-y-1">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Editable Extra Attributes -->
+                    <div class="border-t border-gray-700 pt-4 mt-4 flex-1">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-xs font-semibold text-gray-400 uppercase">Extended Attributes</label>
+                            <button type="button" onclick="app.addAttrRow()" class="text-xs bg-gray-700 hover:bg-gray-600 text-blue-400 px-2 py-1 rounded transition flex items-center gap-1">
+                                <i class="fa-solid fa-plus"></i> Add Tag
+                            </button>
+                        </div>
+                        <div id="attributes-list" class="space-y-2 max-h-[150px] overflow-y-auto pr-1">
+                            <!-- Dynamic rows go here -->
+                        </div>
+                    </div>
+
+                    <div class="pt-4 flex gap-3 mt-auto">
+                        <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded shadow-lg transition font-medium">Save Changes</button>
+                        <button type="button" onclick="app.deleteChannel()" class="px-4 py-2 border border-red-900/50 text-red-400 hover:bg-red-900/20 rounded transition" title="Delete Channel">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 z-50 bg-gray-800 border-l-4 border-blue-500 text-white px-6 py-4 rounded shadow-2xl flex items-center gap-3">
+        <i class="fa-solid fa-info-circle text-blue-500"></i>
+        <span id="toast-msg">Notification</span>
+    </div>
+
+    <script>
+        class M3UManager {
+            constructor() {
+                this.channels = [];
+                this.groups = new Set();
+                this.currentFilter = 'All';
+                this.hls = null;
+                this.sortable = null;
+                this.currentPreviewUrl = "";
+                
+                this.dom = {
+                    fileInput: document.getElementById('file-upload'),
+                    groupList: document.getElementById('group-list'),
+                    channelGrid: document.getElementById('channel-grid'),
+                    groupSearch: document.getElementById('group-search'),
+                    channelSearch: document.getElementById('channel-search'),
+                    modal: document.getElementById('edit-modal'),
+                    currentGroupTitle: document.getElementById('current-group-title'),
+                    statsBadge: document.getElementById('stats-badge'),
+                    // Edit Form DOM
+                    formId: document.getElementById('edit-id'),
+                    formName: document.getElementById('edit-name'),
+                    formGroup: document.getElementById('edit-group'),
+                    formLogo: document.getElementById('edit-logo'),
+                    formUrls: document.getElementById('edit-urls'),
+                    sourceList: document.getElementById('source-list'),
+                    attributesList: document.getElementById('attributes-list'), // New Container
+                    logoPreview: document.getElementById('edit-logo-preview'),
+                    logoIcon: document.getElementById('edit-logo-icon'),
+                    groupSuggestions: document.getElementById('group-suggestions'),
+                    // Video
+                    video: document.getElementById('video-preview'),
+                    videoPlaceholder: document.getElementById('player-placeholder'),
+                    previewUrlLabel: document.getElementById('preview-url')
+                };
+
+                this.init();
+            }
+
+            init() {
+                // Event Listeners
+                this.dom.fileInput.addEventListener('change', (e) => this.handleFileUpload(e));
+                this.dom.groupSearch.addEventListener('input', (e) => this.renderGroupList(e.target.value));
+                this.dom.channelSearch.addEventListener('input', () => this.renderChannels());
+                this.dom.formUrls.addEventListener('input', () => this.updateSourceList());
+                
+                // Initialize Sortable
+                this.initSortable();
+
+                // Load from LocalStorage
+                const savedData = localStorage.getItem('m3u_data');
+                if (savedData) {
+                    try {
+                        this.channels = JSON.parse(savedData);
+                        // Migration check: if old format (single url string), convert to array
+                        this.channels.forEach(c => {
+                            if (c.url && !c.urls) {
+                                c.urls = [c.url];
+                                delete c.url;
+                            }
+                        });
+                        
+                        this.extractGroups();
+                        this.renderGroupList();
+                        this.renderChannels();
+                        this.updateStats();
+                        this.showToast('Loaded saved playlist', 'success');
+                    } catch (e) {
+                        console.error("Failed to load saved data", e);
+                        localStorage.removeItem('m3u_data');
+                    }
+                }
+            }
+
+            initSortable() {
+                if (this.sortable) this.sortable.destroy();
+                
+                this.sortable = new Sortable(this.dom.channelGrid, {
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    dragClass: 'sortable-drag',
+                    delay: 100,
+                    delayOnTouchOnly: true,
+                    onEnd: (evt) => this.handleSort(evt)
+                });
+            }
+
+            handleSort(evt) {
+                if (this.dom.channelSearch.value.trim() !== '') {
+                    this.showToast('Clear search before reordering', 'error');
+                    this.renderChannels(); 
+                    return;
+                }
+
+                const draggedId = evt.item.dataset.id;
+                const nextSibling = evt.item.nextElementSibling;
+                
+                const fromIndex = this.channels.findIndex(c => c.id === draggedId);
+                if (fromIndex === -1) return;
+                
+                const [movedItem] = this.channels.splice(fromIndex, 1);
+                
+                if (nextSibling) {
+                    const nextId = nextSibling.dataset.id;
+                    const toIndex = this.channels.findIndex(c => c.id === nextId);
+                    this.channels.splice(toIndex, 0, movedItem);
+                } else {
+                    if (this.currentFilter === 'All') {
+                        this.channels.push(movedItem);
+                    } else {
+                         const prevSibling = evt.item.previousElementSibling;
+                         if (prevSibling && prevSibling.dataset.id) {
+                             const prevId = prevSibling.dataset.id;
+                             const prevIndex = this.channels.findIndex(c => c.id === prevId);
+                             this.channels.splice(prevIndex + 1, 0, movedItem);
+                         } else {
+                             this.channels.push(movedItem);
+                         }
+                    }
+                }
+                this.saveData();
+            }
+
+            handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const content = e.target.result;
+                    this.parseM3U(content);
+                };
+                reader.readAsText(file);
+                event.target.value = '';
+            }
+
+            parseM3U(content) {
+                const lines = content.split(/\r?\n/);
+                const newChannels = [];
+                
+                let currentChannel = null;
+
+                const attrRegex = /([a-zA-Z0-9-_\.]+)=(?:"([^"]*)"|'([^']*)'|([^ \t]*))/g;
+
+                lines.forEach(line => {
+                    line = line.trim();
+                    if (!line) return;
+
+                    if (line.startsWith('#EXTINF:')) {
+                        if (currentChannel) {
+                            newChannels.push(currentChannel);
+                        }
+
+                        currentChannel = {
+                            id: Date.now() + Math.random().toString(36).substr(2, 9),
+                            urls: [],
+                            attrs: {}
+                        };
+                        
+                        let match;
+                        while ((match = attrRegex.exec(line)) !== null) {
+                            const key = match[1].toLowerCase();
+                            const value = match[2] || match[3] || match[4] || "";
+                            currentChannel.attrs[key] = value;
+                        }
+
+                        const parts = line.split(',');
+                        currentChannel.name = parts.length > 1 ? parts[parts.length - 1].trim() : "Unknown Channel";
+                        
+                        const attrs = currentChannel.attrs;
+                        currentChannel.logo = attrs['tvg-logo'] || attrs['logo'] || attrs['icon'] || attrs['thumb'] || "";
+                        currentChannel.group = attrs['group-title'] || attrs['group'] || attrs['category'] || "Uncategorized";
+
+                    } else if (line.startsWith('#')) {
+                        // skip
+                    } else {
+                        if (currentChannel) {
+                            currentChannel.urls.push(line);
+                        }
+                    }
+                });
+
+                if (currentChannel) {
+                    newChannels.push(currentChannel);
+                }
+
+                if (newChannels.length > 0) {
+                    this.channels = newChannels;
+                    this.extractGroups();
+                    this.renderGroupList();
+                    this.renderChannels();
+                    this.saveData();
+                    this.showToast(`Imported ${newChannels.length} channels`, 'success');
+                } else {
+                    this.showToast('No valid channels found in file', 'error');
+                }
+            }
+
+            extractGroups() {
+                this.groups = new Set(this.channels.map(c => c.group || 'Uncategorized'));
+                this.dom.groupSuggestions.innerHTML = '';
+                Array.from(this.groups).sort().forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g;
+                    this.dom.groupSuggestions.appendChild(opt);
+                });
+            }
+
+            renderGroupList(searchTerm = '') {
+                const list = this.dom.groupList;
+                list.innerHTML = '';
+                
+                const allBtn = document.createElement('button');
+                allBtn.className = `w-full text-left px-3 py-2 rounded text-sm mb-1 flex justify-between items-center ${this.currentFilter === 'All' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700'}`;
+                allBtn.innerHTML = `<span><i class="fa-solid fa-globe w-5 text-center mr-2"></i> All Channels</span> <span class="text-xs opacity-70 bg-black/20 px-2 py-0.5 rounded-full">${this.channels.length}</span>`;
+                allBtn.onclick = () => this.setGroup('All');
+                list.appendChild(allBtn);
+
+                const sortedGroups = Array.from(this.groups).sort();
+                
+                sortedGroups.forEach(group => {
+                    if (searchTerm && !group.toLowerCase().includes(searchTerm.toLowerCase())) return;
+
+                    const count = this.channels.filter(c => c.group === group).length;
+                    const btn = document.createElement('button');
+                    btn.className = `w-full text-left px-3 py-2 rounded text-sm mb-1 flex justify-between items-center group ${this.currentFilter === group ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700'}`;
+                    btn.innerHTML = `<span class="truncate"><i class="fa-solid fa-folder w-5 text-center mr-2 opacity-50"></i> ${group}</span> <span class="text-xs opacity-70 bg-black/20 px-2 py-0.5 rounded-full group-hover:bg-black/40">${count}</span>`;
+                    btn.onclick = () => this.setGroup(group);
+                    list.appendChild(btn);
+                });
+            }
+
+            setGroup(group) {
+                this.currentFilter = group;
+                this.dom.currentGroupTitle.textContent = group === 'All' ? 'All Channels' : group;
+                this.renderGroupList(this.dom.groupSearch.value);
+                this.renderChannels();
+                this.dom.channelGrid.scrollTop = 0;
+            }
+
+            renderChannels() {
+                const grid = this.dom.channelGrid;
+                grid.innerHTML = '';
+
+                const search = this.dom.channelSearch.value.toLowerCase();
+                
+                const filtered = this.channels.filter(c => {
+                    const matchesGroup = this.currentFilter === 'All' || c.group === this.currentFilter;
+                    const matchesSearch = !search || c.name.toLowerCase().includes(search);
+                    return matchesGroup && matchesSearch;
+                });
+
+                const displayLimit = 200; 
+                const itemsToShow = filtered.slice(0, displayLimit);
+
+                if (itemsToShow.length === 0 && this.channels.length > 0) {
+                     grid.innerHTML = `<div class="col-span-full text-center text-gray-500 mt-10">No channels found matching filters.</div>`;
+                     return;
+                }
+
+                itemsToShow.forEach(channel => {
+                    const card = document.createElement('div');
+                    card.className = 'channel-card bg-gray-800 rounded-lg overflow-hidden border border-gray-700 cursor-pointer group relative flex flex-col h-full';
+                    card.dataset.id = channel.id; 
+                    
+                    const logoSrc = channel.logo || 'https://via.placeholder.com/150?text=No+Logo';
+                    
+                    card.innerHTML = `
+                        <div class="h-40 w-full bg-black/50 relative p-4 flex items-center justify-center shrink-0 border-b border-gray-700/50">
+                            <img src="${logoSrc}" alt="${channel.name}" class="max-w-full max-h-full object-contain drop-shadow-md select-none pointer-events-none" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjN0E3QTdBIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHJlY3QgeD0iMyIgeT0iMyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iMiIgcnk9IjIiPjwvcmVjdD48Y2lyY2xlIGN4PSI4LjUiIGN5PSI4LjUiIHI9IjEuNSI+PC9jaXJjbGU+PHBvbHlsaW5lIHBvaW50cz0iMjEgMTUgMTYgMTAgNSAyMSI+PC9wb2x5bGluZT48L3N2Zz4='">
+                            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-3">
+                                <i class="fa-solid fa-up-down-left-right text-white text-xl cursor-grab active:cursor-grabbing hover:scale-110 transition-transform"></i>
+                                <button class="edit-btn bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-full shadow-lg transform hover:scale-105 transition-all" title="Edit">
+                                    <i class="fa-solid fa-pen text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-3 flex-1 flex flex-col">
+                            <h3 class="font-bold text-sm truncate" title="${channel.name}">${channel.name}</h3>
+                            <div class="flex justify-between items-center mt-auto pt-2">
+                                <p class="text-xs text-gray-400 truncate max-w-[70%]">${channel.group}</p>
+                                <span class="text-[10px] bg-gray-700 px-1.5 rounded text-gray-300" title="Sources">${channel.urls.length} Src</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    const editBtn = card.querySelector('.edit-btn');
+                    editBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        this.openEditModal(channel);
+                    };
+
+                    grid.appendChild(card);
+                });
+                
+                if (filtered.length > displayLimit) {
+                    const more = document.createElement('div');
+                    more.className = "col-span-full text-center py-4 text-gray-500 text-sm";
+                    more.innerText = `Showing 200 of ${filtered.length} channels. Use search to find specific items.`;
+                    grid.appendChild(more);
+                }
+            }
+
+            openEditModal(channel) {
+                const c = this.channels.find(ch => ch.id === channel.id);
+                if (!c) return;
+
+                this.dom.formId.value = c.id;
+                this.dom.formName.value = c.name || '';
+                this.dom.formGroup.value = c.group || '';
+                this.dom.formLogo.value = c.logo || '';
+                this.dom.formUrls.value = (c.urls || []).join('\n');
+                
+                // Clear and populate attributes list
+                this.dom.attributesList.innerHTML = '';
+                const extraKeys = Object.keys(c.attrs || {}).filter(k => 
+                    !['tvg-logo', 'logo', 'icon', 'thumb', 'group-title', 'group', 'category'].includes(k)
+                );
+                
+                extraKeys.forEach(key => {
+                    this.addAttrRow(key, c.attrs[key]);
+                });
+
+                this.updateLogoPreview(c.logo);
+                this.updateSourceList();
+                
+                this.dom.modal.classList.remove('hidden');
+                this.dom.modal.classList.add('flex');
+
+                if (c.urls && c.urls.length > 0) {
+                    this.testStream(c.urls[0]);
+                } else {
+                    this.resetPlayerUI();
+                }
+            }
+
+            addAttrRow(key = '', value = '') {
+                const row = document.createElement('div');
+                row.className = 'flex gap-2 items-center';
+                row.innerHTML = `
+                    <input type="text" placeholder="Key (e.g. tvg-shift)" value="${key}" class="attr-key bg-gray-900 border border-gray-600 rounded px-2 py-1 text-xs text-gray-300 w-1/3 focus:border-blue-500 focus:outline-none">
+                    <input type="text" placeholder="Value" value="${value}" class="attr-val bg-gray-900 border border-gray-600 rounded px-2 py-1 text-xs text-white flex-1 focus:border-blue-500 focus:outline-none">
+                    <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-300 px-1">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                `;
+                this.dom.attributesList.appendChild(row);
+            }
+
+            updateSourceList() {
+                const list = this.dom.sourceList;
+                const urls = this.dom.formUrls.value.split('\n').map(u => u.trim()).filter(u => u);
+                
+                list.innerHTML = '';
+                
+                if (urls.length === 0) {
+                    list.innerHTML = '<div class="text-xs text-gray-500 italic p-2">No URLs added</div>';
+                    return;
+                }
+
+                urls.forEach((url, idx) => {
+                    const chip = document.createElement('div');
+                    const isActive = url === this.currentPreviewUrl;
+                    chip.className = `stream-chip border border-gray-700 rounded px-2 py-1.5 cursor-pointer flex items-center justify-between group ${isActive ? 'active' : 'bg-gray-800 text-gray-300'}`;
+                    chip.innerHTML = `
+                        <div class="flex items-center gap-2 overflow-hidden">
+                            <i class="fa-solid fa-play text-[10px] ${isActive ? 'text-blue-400' : 'text-gray-500'}"></i>
+                            <span class="text-xs truncate font-mono">${url}</span>
+                        </div>
+                    `;
+                    chip.onclick = () => this.testStream(url);
+                    list.appendChild(chip);
+                });
+            }
+
+            closeModal() {
+                this.dom.modal.classList.add('hidden');
+                this.dom.modal.classList.remove('flex');
+                
+                if (this.hls) {
+                    this.hls.destroy();
+                    this.hls = null;
+                }
+                this.dom.video.pause();
+                this.dom.video.src = "";
+                this.currentPreviewUrl = "";
+            }
+
+            updateLogoPreview(url) {
+                const img = this.dom.logoPreview;
+                const icon = this.dom.logoIcon;
+                
+                if (url) {
+                    img.src = url;
+                    img.style.display = 'block';
+                    icon.style.display = 'none';
+                } else {
+                    img.style.display = 'none';
+                    icon.style.display = 'block';
+                }
+            }
+
+            resetPlayerUI() {
+                this.dom.video.classList.add('hidden');
+                this.dom.videoPlaceholder.classList.remove('hidden');
+                this.dom.previewUrlLabel.textContent = "No source selected";
+            }
+
+            testStream(url) {
+                if (!url) return;
+                
+                this.currentPreviewUrl = url;
+                this.updateSourceList(); 
+                this.dom.previewUrlLabel.textContent = url;
+                
+                const video = this.dom.video;
+                this.dom.videoPlaceholder.classList.add('hidden');
+                video.classList.remove('hidden');
+
+                if (Hls.isSupported() && (url.includes('.m3u8') || !video.canPlayType('application/vnd.apple.mpegurl'))) {
+                    if (this.hls) this.hls.destroy();
+                    this.hls = new Hls();
+                    this.hls.loadSource(url);
+                    this.hls.attachMedia(video);
+                    this.hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        video.play().catch(e => console.log("Auto-play prevented"));
+                    });
+                    this.hls.on(Hls.Events.ERROR, (event, data) => {
+                         if (data.fatal) {
+                             console.log("HLS Error", data);
+                         }
+                    });
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    video.src = url;
+                    video.addEventListener('loadedmetadata', function() {
+                        video.play();
+                    });
+                } else {
+                    video.src = url;
+                    video.play();
+                }
+            }
+
+            saveEdit() {
+                const id = this.dom.formId.value;
+                const index = this.channels.findIndex(c => c.id === id);
+                
+                if (index !== -1) {
+                    const oldGroup = this.channels[index].group;
+                    const newGroup = this.dom.formGroup.value.trim() || 'Uncategorized';
+                    const newName = this.dom.formName.value.trim();
+                    const newLogo = this.dom.formLogo.value.trim();
+                    const newUrls = this.dom.formUrls.value.split('\n').map(u => u.trim()).filter(u => u);
+
+                    // Reconstruct attributes object
+                    const newAttrs = {};
+                    
+                    // Add standard attributes
+                    if(newLogo) newAttrs['tvg-logo'] = newLogo;
+                    if(newGroup) newAttrs['group-title'] = newGroup;
+
+                    // Add dynamic attributes
+                    const rows = this.dom.attributesList.children;
+                    for (let row of rows) {
+                        const key = row.querySelector('.attr-key').value.trim();
+                        const val = row.querySelector('.attr-val').value.trim();
+                        if (key) {
+                            newAttrs[key] = val;
+                        }
+                    }
+
+                    // Update main object
+                    const updatedChannel = {
+                        ...this.channels[index],
+                        name: newName,
+                        group: newGroup,
+                        logo: newLogo,
+                        urls: newUrls,
+                        attrs: newAttrs
+                    };
+                    
+                    this.channels[index] = updatedChannel;
+
+                    this.extractGroups();
+                    if (oldGroup !== newGroup) {
+                        this.renderGroupList();
+                    }
+                    this.renderChannels();
+                    this.saveData();
+                    this.closeModal();
+                    this.showToast('Channel updated successfully', 'success');
+                }
+            }
+
+            deleteChannel() {
+                if(confirm("Are you sure you want to delete this channel?")) {
+                    const id = this.dom.formId.value;
+                    const initialLength = this.channels.length;
+                    
+                    this.channels = this.channels.filter(c => c.id !== id);
+                    
+                    if (this.channels.length < initialLength) {
+                        this.extractGroups();
+                        this.renderGroupList();
+                        this.renderChannels();
+                        this.saveData();
+                        this.closeModal();
+                        this.showToast('Channel deleted', 'error');
+                    } else {
+                        this.showToast('Error deleting channel', 'error');
+                    }
+                }
+            }
+
+            addChannel() {
+                const newId = Date.now().toString();
+                const newChannel = {
+                    id: newId,
+                    name: "New Channel",
+                    group: this.currentFilter === 'All' ? 'Uncategorized' : this.currentFilter,
+                    logo: "",
+                    urls: [],
+                    attrs: {}
+                };
+                this.channels.unshift(newChannel);
+                this.extractGroups();
+                this.renderChannels();
+                setTimeout(() => this.openEditModal(newChannel), 50);
+            }
+
+            saveData() {
+                localStorage.setItem('m3u_data', JSON.stringify(this.channels));
+                this.updateStats();
+            }
+
+            clearAll() {
+                if(confirm("Delete all channels and reset app? This cannot be undone.")) {
+                    this.channels = [];
+                    this.groups = new Set();
+                    this.saveData();
+                    this.renderGroupList();
+                    this.renderChannels();
+                    this.showToast('All data cleared', 'error');
+                }
+            }
+
+            updateStats() {
+                const badge = this.dom.statsBadge;
+                if (this.channels.length > 0) {
+                    badge.textContent = `${this.channels.length} Channels`;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+
+            downloadM3U() {
+                if (this.channels.length === 0) {
+                    this.showToast('Nothing to export!', 'error');
+                    return;
+                }
+
+                let content = "#EXTM3U\n";
+                this.channels.forEach(c => {
+                    // Attributes are already updated in saveEdit()
+                    // But we ensure we export standard keys cleanly
+                    const exportAttrs = { ...c.attrs };
+                    
+                    // Fallback ensure
+                    if (c.logo && !exportAttrs['tvg-logo']) exportAttrs['tvg-logo'] = c.logo;
+                    if (c.group && !exportAttrs['group-title']) exportAttrs['group-title'] = c.group;
+
+                    // Clean up duplicate non-standard keys used in logic
+                    if (exportAttrs['tvg-logo']) delete exportAttrs['logo'];
+                    if (exportAttrs['group-title']) delete exportAttrs['group'];
+
+                    // Build attribute string
+                    let attrString = "";
+                    for (const [key, value] of Object.entries(exportAttrs)) {
+                        attrString += ` ${key}="${value}"`;
+                    }
+
+                    // Write EXTINF line
+                    content += `#EXTINF:-1${attrString},${c.name}\n`;
+                    // Write URLs
+                    if (c.urls && c.urls.length > 0) {
+                        c.urls.forEach(url => {
+                             content += `${url}\n`;
+                        });
+                    }
+                });
+
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'playlist_edited.m3u';
+                a.click();
+                window.URL.revokeObjectURL(url);
+                this.showToast('Playlist downloaded', 'success');
+            }
+
+            showToast(msg, type = 'info') {
+                const toast = document.getElementById('toast');
+                const msgEl = document.getElementById('toast-msg');
+                const icon = toast.querySelector('i');
+
+                msgEl.textContent = msg;
+                
+                if (type === 'error') {
+                    toast.classList.replace('border-blue-500', 'border-red-500');
+                    icon.className = 'fa-solid fa-circle-exclamation text-red-500';
+                } else if (type === 'success') {
+                    toast.classList.replace('border-red-500', 'border-green-500');
+                    toast.classList.replace('border-blue-500', 'border-green-500');
+                    icon.className = 'fa-solid fa-check-circle text-green-500';
+                } else {
+                    toast.classList.replace('border-red-500', 'border-blue-500');
+                    toast.classList.replace('border-green-500', 'border-blue-500');
+                    icon.className = 'fa-solid fa-info-circle text-blue-500';
+                }
+
+                toast.classList.remove('translate-y-20', 'opacity-0');
+                
+                setTimeout(() => {
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 3000);
+            }
+        }
+
+        const app = new M3UManager();
+    </script>
+</body>
+</html>
