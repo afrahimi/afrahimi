@@ -1,4 +1,6 @@
 #EXTM3U
+#EXTINF:-1 tvg-logo="https://i.imgur.com/B3fuAGK.jpeg" group-title="News",Iran National Revolution TV
+https://hls.irannrtv.live/hls/stream.m3u8
 #EXTINF:-1 tvg-id="IranInternational.uk" tvg-logo="https://i.imgur.com/55RpaF3.png" group-title="News",Iran International (1080p)
 https://dev-live.livetvstream.co.uk/LS-63503-4/index.m3u8
 #EXTINF:-1 tvg-id="Manoto.uk" dynamic-id="parsa:Manoto" tvg-logo="https://i.imgur.com/g5OLcek.png" group-title="News",Manoto (720p)
@@ -117,3 +119,4 @@ https://kjhls.wns.live/hls/stream.m3u8
 https://iptv.negahtv.com/negahtv/playlist.m3u8
 #EXTINF:-1 tvg-id="OmideIranTV.ir" tvg-logo="https://i.imgur.com/CKnSRQ1.png" group-title="Entertainment",Omide Iran (720p)
 https://oitnhls.wns.live/hls/stream.m3u8
+
